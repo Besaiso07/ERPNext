@@ -1,0 +1,130 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-03-16 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "customer",
+  "booking_date",
+  "status",
+  "flights_section",
+  "flights",
+  "hotels_section",
+  "hotels",
+  "totals_section",
+  "total_cost",
+  "total_selling_amount",
+  "total_profit",
+  "sales_invoice_reference"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "TOUR-.YYYY.-"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "booking_date",
+   "default": "Today",
+   "fieldtype": "Date",
+   "label": "Booking Date"
+  },
+  {
+   "fieldname": "status",
+   "default": "Draft",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nConfirmed\nCancelled"
+  },
+  {
+   "fieldname": "flights_section",
+   "fieldtype": "Section Break",
+   "label": "Flights"
+  },
+  {
+   "fieldname": "flights",
+   "fieldtype": "Table",
+   "label": "Flights",
+   "options": "Flight Ticket Item"
+  },
+  {
+   "fieldname": "hotels_section",
+   "fieldtype": "Section Break",
+   "label": "Hotels"
+  },
+  {
+   "fieldname": "hotels",
+   "fieldtype": "Table",
+   "label": "Hotels",
+   "options": "Hotel Reservation Item"
+  },
+  {
+   "fieldname": "totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals"
+  },
+  {
+   "fieldname": "total_cost",
+   "fieldtype": "Currency",
+   "label": "Total Cost",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_selling_amount",
+   "fieldtype": "Currency",
+   "label": "Total Selling Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_profit",
+   "fieldtype": "Currency",
+   "label": "Total Profit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_invoice_reference",
+   "fieldtype": "Link",
+   "label": "Sales Invoice Reference",
+   "options": "Sales Invoice",
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 0,
+ "links": [],
+ "modified": "2026-03-16 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Tourism App",
+ "name": "Tour Booking",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

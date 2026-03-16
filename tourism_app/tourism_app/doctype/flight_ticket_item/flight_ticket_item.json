@@ -1,0 +1,173 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-03-16 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_general",
+  "ticket_number",
+  "pax_name",
+  "airline_supplier",
+  "col_break_1",
+  "ticket_pnr",
+  "flight_route",
+  "flight_class",
+  "col_break_2",
+  "departure_date",
+  "return_date",
+  "flight_time",
+  "flight_number",
+  "section_financial",
+  "col_break_cost",
+  "fare",
+  "tax",
+  "supplier_commission",
+  "net_purchase_price",
+  "col_break_revenue",
+  "agency_markup",
+  "selling_price",
+  "profit"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_general",
+   "fieldtype": "Section Break",
+   "label": "General Ticket Details"
+  },
+  {
+   "fieldname": "ticket_number",
+   "fieldtype": "Data",
+   "label": "Ticket No.",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "pax_name",
+   "fieldtype": "Data",
+   "label": "Passenger Name",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "airline_supplier",
+   "fieldtype": "Link",
+   "label": "Airline/Supplier",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "col_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ticket_pnr",
+   "fieldtype": "Data",
+   "label": "PNR No.",
+   "reqd": 1
+  },
+  {
+   "fieldname": "flight_route",
+   "fieldtype": "Data",
+   "label": "Sector / Route",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "flight_class",
+   "fieldtype": "Select",
+   "label": "Flight Class",
+   "options": "\nEconomy\nBusiness\nFirst"
+  },
+  {
+   "fieldname": "col_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "departure_date",
+   "fieldtype": "Date",
+   "label": "Departure Date"
+  },
+  {
+   "fieldname": "return_date",
+   "fieldtype": "Date",
+   "label": "Return Date"
+  },
+  {
+   "fieldname": "flight_time",
+   "fieldtype": "Time",
+   "label": "Flight Time"
+  },
+  {
+   "fieldname": "flight_number",
+   "fieldtype": "Data",
+   "label": "Flight Number"
+  },
+  {
+   "fieldname": "section_financial",
+   "fieldtype": "Section Break",
+   "label": "Financial Details"
+  },
+  {
+   "fieldname": "col_break_cost",
+   "fieldtype": "Column Break",
+   "label": "Purchasing (Cost Details)"
+  },
+  {
+   "fieldname": "fare",
+   "fieldtype": "Currency",
+   "label": "Published Fare"
+  },
+  {
+   "fieldname": "tax",
+   "fieldtype": "Currency",
+   "label": "Tax Details"
+  },
+  {
+   "fieldname": "supplier_commission",
+   "fieldtype": "Currency",
+   "label": "STD Commission"
+  },
+  {
+   "fieldname": "net_purchase_price",
+   "fieldtype": "Currency",
+   "label": "Supplier Amount / Net Cost",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_break_revenue",
+   "fieldtype": "Column Break",
+   "label": "Selling (Revenue Details)"
+  },
+  {
+   "fieldname": "agency_markup",
+   "fieldtype": "Currency",
+   "label": "Service Fee / Markup"
+  },
+  {
+   "fieldname": "selling_price",
+   "fieldtype": "Currency",
+   "label": "Final Selling Price",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "profit",
+   "fieldtype": "Currency",
+   "label": "Profit",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-03-16 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Tourism App",
+ "name": "Flight Ticket Item",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
