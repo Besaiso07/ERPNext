@@ -50,8 +50,18 @@ class TourBooking(Document):
         3. Create Draft Purchase Invoice(s) for each unique supplier
            (airlines and hotels), grouped by supplier name.
         """
-        if self.sales_invoice_reference:
-            frappe.throw("An invoice is already linked to this booking.")
+        # We only want to process items where is_reported == 0
+        unreported_flights = [f for f in self.flights if not f.is_reported]
+        unreported_hotels = [h for h in self.hotels if not h.is_reported]
+
+        if not unreported_flights and not unreported_hotels:
+            frappe.throw("All items in this booking have already been reported.")
+
+        # Calculate selling amount for only unreported items
+        selling_amount = (
+            sum(f.selling_price or 0 for f in unreported_flights) +
+            sum(h.selling_price or 0 for h in unreported_hotels)
+        )
 
         # ------------------------------------------------------------------
         # 1. Sales Invoice
@@ -69,7 +79,7 @@ class TourBooking(Document):
                     "item_name": "Tour Package",
                     "description": f"Tour Booking: {self.name}",
                     "qty": 1,
-                    "rate": self.total_selling_amount or 0,
+                    "rate": selling_amount or 0,
                     "uom": "Nos",
                 }
             ],
@@ -84,7 +94,7 @@ class TourBooking(Document):
         supplier_costs = {}
 
         # Flight rows — key: airline_supplier, value: net_purchase_price
-        for flight in self.flights:
+        for flight in unreported_flights:
             supplier = flight.airline_supplier
             if not supplier:
                 continue
@@ -92,7 +102,7 @@ class TourBooking(Document):
             supplier_costs[supplier] = supplier_costs.get(supplier, 0) + cost
 
         # Hotel rows — key: hotel_supplier, value: purchase_price
-        for hotel in self.hotels:
+        for hotel in unreported_hotels:
             supplier = hotel.hotel_supplier
             if not supplier:
                 continue
@@ -124,6 +134,7 @@ class TourBooking(Document):
                         "uom": "Nos",
                     }
                 ],
+                "custom_tour_booking": self.name,
             })
             pi.flags.ignore_permissions = True
             pi.insert()   # Saved as Draft — NOT submitted intentionally
@@ -132,7 +143,20 @@ class TourBooking(Document):
         # ------------------------------------------------------------------
         # 4. Save reference & User feedback
         # ------------------------------------------------------------------
+        # Update unreported items to is_reported = 1
+        for f in unreported_flights:
+            f.is_reported = 1
+            f.sales_invoice = sales_invoice.name
+        
+        for h in unreported_hotels:
+            h.is_reported = 1
+            h.sales_invoice = sales_invoice.name
+
         self.db_set("sales_invoice_reference", sales_invoice.name)
+        
+        # Save without triggering validations that might cause recursion
+        self.flags.ignore_validate = True
+        self.save()
 
         pi_list = ", ".join(f"<b>{p}</b>" for p in purchase_invoices_created)
         frappe.msgprint(
@@ -182,3 +206,86 @@ class TourBooking(Document):
         item.flags.ignore_permissions = True
         item.insert()
         frappe.db.commit()
+
+@frappe.whitelist()
+def create_invoice_from_report(selected_items):
+    """
+    selected_items: List of dicts with {name, item_type, booking_ref}
+    """
+    if isinstance(selected_items, str):
+        import json
+        selected_items = json.loads(selected_items)
+
+    if not selected_items:
+        return "No items selected."
+
+    # Group items by Customer (from Tour Booking)
+    customer_items = {} # customer -> list of items info
+    
+    for item_info in selected_items:
+        booking_name = item_info.get("booking_ref")
+        if not booking_name:
+            continue
+            
+        customer = frappe.db.get_value("Tour Booking", booking_name, "customer")
+        if not customer:
+            continue
+            
+        if customer not in customer_items:
+            customer_items[customer] = []
+        customer_items[customer].append(item_info)
+
+    created_invoices = []
+
+    for customer, items in customer_items.items():
+        # Calculate total selling price for these items
+        total_selling = 0
+        item_descriptions = []
+        
+        # Prepare to update items after SI creation
+        items_to_update = [] # list of (doctype, name)
+
+        for item in items:
+            dt = "Flight Ticket Item" if item["item_type"] == "Flight Ticket" else "Hotel Reservation Item"
+            price = frappe.db.get_value(dt, item["name"], "selling_price") or 0
+            total_selling += price
+            
+            pax_hotel = frappe.db.get_value(dt, item["name"], "pax_name" if item["item_type"] == "Flight Ticket" else "hotel_name")
+            item_descriptions.append(f"{item['item_type']}: {pax_hotel} (Ref: {item['booking_ref']})")
+            
+            items_to_update.append((dt, item["name"]))
+
+        if total_selling <= 0:
+            continue
+
+        # Create Sales Invoice
+        si = frappe.get_doc({
+            "doctype": "Sales Invoice",
+            "customer": customer,
+            "posting_date": frappe.utils.today(),
+            "due_date": frappe.utils.today(),
+            "items": [
+                {
+                    "item_code": "Tour Package",
+                    "item_name": "Tour Package",
+                    "description": "\n".join(item_descriptions),
+                    "qty": 1,
+                    "rate": total_selling,
+                    "uom": "Nos",
+                }
+            ]
+        })
+        si.insert(ignore_permissions=True)
+        created_invoices.append(si.name)
+
+        # Update items
+        for dt, name in items_to_update:
+            frappe.db.set_value(dt, name, {
+                "is_reported": 1,
+                "sales_invoice": si.name
+            })
+
+    if not created_invoices:
+        return "No invoices were created (check total amounts)."
+
+    return f"Successfully created {len(created_invoices)} Sales Invoice(s): {', '.join(created_invoices)}"

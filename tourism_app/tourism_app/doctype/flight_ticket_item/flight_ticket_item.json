@@ -28,7 +28,9 @@
   "col_break_revenue",
   "agency_markup",
   "selling_price",
-  "profit"
+  "profit",
+  "is_reported",
+  "sales_invoice"
  ],
  "fields": [
   {
@@ -154,6 +156,20 @@
    "fieldname": "profit",
    "fieldtype": "Currency",
    "label": "Profit",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_reported",
+   "fieldtype": "Check",
+   "label": "Is Reported",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
    "read_only": 1
   }
  ],

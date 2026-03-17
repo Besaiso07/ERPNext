@@ -12,8 +12,9 @@
   "check_out",
   "room_type",
   "purchase_price",
-  "agency_markup",
-  "selling_price"
+  "selling_price",
+  "is_reported",
+  "sales_invoice"
  ],
  "fields": [
   {
@@ -60,6 +61,20 @@
    "label": "Selling Price",
    "read_only": 1,
    "in_list_view": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_reported",
+   "fieldtype": "Check",
+   "label": "Is Reported",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1
   }
  ],
  "istable": 1,
