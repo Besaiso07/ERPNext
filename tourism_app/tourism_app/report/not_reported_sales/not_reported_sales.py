@@ -58,7 +58,7 @@ def get_data(filters):
 	flights = frappe.db.get_all(
 		"Flight Ticket Item",
 		filters={"is_reported": 0},
-		fields=["name", "pax_name", "airline_supplier", "net_purchase_price", "selling_price", "parent"]
+		fields=["name", "pax_name", "supplier", "net_purchase_price", "selling_price", "parent"]
 	)
 	
 	for f in flights:
@@ -66,7 +66,7 @@ def get_data(filters):
 			"name": f.name,
 			"item_type": "Flight Ticket",
 			"name_desc": f.pax_name,
-			"supplier": f.airline_supplier,
+			"supplier": f.supplier,
 			"net_cost": f.net_purchase_price,
 			"selling_price": f.selling_price,
 			"booking_ref": f.parent

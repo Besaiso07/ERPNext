@@ -38,3 +38,48 @@ frappe.ui.form.on('Tour Booking', {
         }
     }
 });
+
+frappe.ui.form.on('Flight Ticket Item', {
+    flight_route: function(frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        if (row.flight_route) {
+            // 1. Formatting Logic (Uppercase + Auto-dash)
+            let val = row.flight_route.toUpperCase();
+            let clean_val = val.replace(/[^A-Z]/g, '');
+            let segments = [];
+            
+            // Chunk into 3s
+            for (let i = 0; i < clean_val.length; i += 3) {
+                segments.push(clean_val.substring(i, i + 3));
+            }
+
+            // 2. Validation / Auto-delete Logic
+            let valid_segments = [];
+            let check_promises = segments.map(code => {
+                if (code.length === 3) {
+                    return frappe.db.exists('Airport', code).then(exists => {
+                        if (exists) {
+                            valid_segments.push(code);
+                        } else {
+                            frappe.show_alert({
+                                message: `خطأ: كود المطار (${code}) غير موجود! تم حذفه تلقائياً.`,
+                                indicator: 'red'
+                            }, 5);
+                        }
+                    });
+                } else {
+                    // If it's incomplete (1 or 2 letters), keep it for now so user can finish typing
+                    valid_segments.push(code);
+                    return Promise.resolve();
+                }
+            });
+
+            Promise.all(check_promises).then(() => {
+                let formatted = valid_segments.join('-');
+                if (row.flight_route !== formatted) {
+                    frappe.model.set_value(cdt, cdn, 'flight_route', formatted);
+                }
+            });
+        }
+    }
+});

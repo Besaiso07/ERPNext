@@ -9,12 +9,13 @@
   "section_general",
   "ticket_number",
   "pax_name",
-  "airline_supplier",
   "col_break_1",
+  "airline",
   "ticket_pnr",
+  "col_break_2",
+  "supplier",
   "flight_route",
   "flight_class",
-  "col_break_2",
   "departure_date",
   "return_date",
   "flight_time",
@@ -53,14 +54,16 @@
    "in_list_view": 1
   },
   {
-   "fieldname": "airline_supplier",
-   "fieldtype": "Link",
-   "label": "Airline/Supplier",
-   "options": "Supplier"
-  },
-  {
    "fieldname": "col_break_1",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "airline",
+   "fieldtype": "Link",
+   "label": "Airline / Carrier",
+   "options": "Airline",
+   "reqd": 1,
+   "in_list_view": 1
   },
   {
    "fieldname": "ticket_pnr",
@@ -69,9 +72,20 @@
    "reqd": 1
   },
   {
+   "fieldname": "col_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier / Source",
+   "options": "Supplier"
+  },
+  {
    "fieldname": "flight_route",
    "fieldtype": "Data",
    "label": "Sector / Route",
+   "reqd": 1,
    "in_list_view": 1
   },
   {
@@ -79,10 +93,6 @@
    "fieldtype": "Select",
    "label": "Flight Class",
    "options": "\nEconomy\nBusiness\nFirst"
-  },
-  {
-   "fieldname": "col_break_2",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "departure_date",

@@ -23,6 +23,18 @@ class TourBooking(Document):
             flight.selling_price = flight.net_purchase_price + markup
             flight.profit = flight.selling_price - flight.net_purchase_price
 
+            # --- Airport Code Validation ---
+            if flight.flight_route:
+                flight.flight_route = flight.flight_route.upper().strip()
+                codes = flight.flight_route.split('-')
+                for code in codes:
+                    code = code.strip()
+                    if code and not frappe.db.exists("Airport", code):
+                        frappe.throw(
+                            f"خطأ: كود المطار ({code}) غير معرف في النظام. يرجى إضافته في جدول المطارات أولاً قبل استخدامه في خط السير.",
+                            title="Airport Not Found"
+                        )
+
         # --- Hotels ---
         for hotel in self.hotels:
             purchase = hotel.purchase_price or 0
@@ -95,7 +107,7 @@ class TourBooking(Document):
 
         # Flight rows — key: airline_supplier, value: net_purchase_price
         for flight in unreported_flights:
-            supplier = flight.airline_supplier
+            supplier = flight.supplier
             if not supplier:
                 continue
             cost = flight.net_purchase_price or 0

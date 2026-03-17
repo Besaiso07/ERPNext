@@ -1,0 +1,73 @@
+{
+ "actions": [],
+ "autoname": "field:iata_code",
+ "creation": "2026-03-17 13:10:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "iata_code",
+  "airport_name_en",
+  "airport_name_ar",
+  "city",
+  "country"
+ ],
+ "fields": [
+  {
+   "fieldname": "iata_code",
+   "fieldtype": "Data",
+   "label": "IATA Code",
+   "length": 3,
+   "mandatory_depends_on": "",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "airport_name_en",
+   "fieldtype": "Data",
+   "label": "Airport Name (English)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "airport_name_ar",
+   "fieldtype": "Data",
+   "label": "اسم المطار (عربي)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "City"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-17 13:10:00.000000",
+ "modified_by": "Administrator",
+ "module": "Tourism App",
+ "name": "Airport",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
