@@ -21,6 +21,25 @@ frappe.ui.form.on('Tour Booking', {
             }).addClass('btn-primary');
         }
 
+        // Show "Update All Linked Invoices" button if reference exists
+        if (!frm.doc.__islocal && frm.doc.sales_invoice_reference) {
+            frm.add_custom_button(__('Update All Linked Invoices'), function() {
+                frappe.call({
+                    method: 'tourism_app.tourism_app.doctype.tour_booking.tour_booking.manual_sync_invoices',
+                    args: {
+                        docname: frm.doc.name
+                    },
+                    freeze: true,
+                    freeze_message: __('Syncing Invoices...'),
+                    callback: function(r) {
+                        if (!r.exc) {
+                            frm.reload_doc();
+                        }
+                    }
+                });
+            }).addClass('btn-primary');
+        }
+
         // Show "Unlink Invoice" button if reference exists
         if (!frm.doc.__islocal && frm.doc.sales_invoice_reference) {
             frm.add_custom_button(__('Unlink Invoice'), function() {
@@ -36,8 +55,95 @@ frappe.ui.form.on('Tour Booking', {
                 });
             }).addClass('btn-danger');
         }
+
+        // Show "Import AIR File Content" button
+        frm.add_custom_button(__('Import AIR File Content'), function() {
+            let d = new frappe.ui.Dialog({
+                title: __('Paste AIR File Content'),
+                fields: [
+                    {
+                        label: __('AIR Content'),
+                        fieldname: 'air_content',
+                        fieldtype: 'Small Text',
+                        reqd: 1
+                    }
+                ],
+                primary_action_label: __('Import'),
+                primary_action(values) {
+                    frappe.call({
+                        method: 'tourism_app.tourism_app.doctype.tour_booking.tour_booking.import_air_file',
+                        args: {
+                            content: values.air_content,
+                            docname: frm.doc.name
+                        },
+                        freeze: true,
+                        freeze_message: __('Parsing AIR File...'),
+                        callback: function(r) {
+                            if (!r.exc) {
+                                frm.reload_doc();
+                                d.hide();
+                                frappe.show_alert({
+                                    message: __('AIR File Content Imported successfully!'),
+                                    indicator: 'green'
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+            d.show();
+        });
+
+        update_live_margin(frm);
     }
 });
+
+function update_live_margin(frm) {
+    let rev_lyd = 0;
+    let cost_lyd = 0;
+    let currency_costs = {};
+
+    (frm.doc.flights || []).forEach(f => {
+        let f_curr = f.currency || 'LYD';
+        let f_net_foreign = (f.fare || 0) + (f.tax || 0) - (f.supplier_commission || 0);
+        
+        currency_costs[f_curr] = (currency_costs[f_curr] || 0) + f_net_foreign;
+        cost_lyd += (f.base_currency_amount || 0);
+        rev_lyd += (f.fare || 0) + (f.tax || 0) + (f.agency_markup || 0);
+    });
+
+    (frm.doc.hotels || []).forEach(h => {
+        let h_curr = h.currency || 'LYD';
+        currency_costs[h_curr] = (currency_costs[h_curr] || 0) + (h.purchase_price || 0);
+        cost_lyd += (h.base_purchase_price || h.purchase_price || 0);
+        rev_lyd += (h.purchase_price || 0) + (h.agency_markup || 0);
+    });
+
+    let profit = rev_lyd - cost_lyd;
+    let color = profit >= 0 ? 'green' : 'red';
+    
+    // Build currency breakdown string
+    let breakdown = Object.keys(currency_costs).map(curr => {
+        return `${curr}: <b>${currency_costs[curr].toFixed(2)}</b>`;
+    }).join(' | ');
+
+    let html = `<div style="padding: 12px; background-color: #fcfcfc; border-radius: 8px; border: 1px solid #eee; border-left: 5px solid ${color}; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+        <div style="font-size: 1.1em; margin-bottom: 8px;">
+            <strong>Financial Summary:</strong>
+        </div>
+        <div style="margin-bottom: 5px;">
+            <span style="color: #666;">Total Revenue (LYD):</span> <b>${rev_lyd.toFixed(2)}</b>
+        </div>
+        <div style="margin-bottom: 5px;">
+            <span style="color: #666;">Cost Breakdown:</span> ${breakdown}
+        </div>
+        <div style="margin-top: 10px; border-top: 1px dashed #eee; padding-top: 8px; font-size: 1.2em;">
+            <strong>Final Profit (Equivalent LYD):</strong> <span style="color: ${color}; font-weight: bold;">${profit.toFixed(2)}</span>
+        </div>
+    </div>`;
+    
+    frm.dashboard.set_headline(html);
+}
 
 frappe.ui.form.on('Flight Ticket Item', {
     flight_route: function(frm, cdt, cdn) {
@@ -81,5 +187,42 @@ frappe.ui.form.on('Flight Ticket Item', {
                 }
             });
         }
+    },
+    fare: function(frm, cdt, cdn) { calculate_flight_totals(frm, cdt, cdn); },
+    tax: function(frm, cdt, cdn) { calculate_flight_totals(frm, cdt, cdn); },
+    commission_type: function(frm, cdt, cdn) { calculate_flight_totals(frm, cdt, cdn); },
+    commission_rate: function(frm, cdt, cdn) { calculate_flight_totals(frm, cdt, cdn); },
+    agency_markup: function(frm, cdt, cdn) { calculate_flight_totals(frm, cdt, cdn); }
+});
+
+function calculate_flight_totals(frm, cdt, cdn) {
+    let row = locals[cdt][cdn];
+    let fare = flt(row.fare);
+    let tax = flt(row.tax);
+    let comm_rate = flt(row.commission_rate);
+    let std_comm = 0;
+    
+    if (row.commission_type === 'Fixed Amount') {
+        std_comm = comm_rate;
+    } else { // Default to percentage
+        std_comm = fare * (comm_rate / 100);
     }
+    
+    let net_cost = fare + tax - std_comm;
+    let selling = fare + tax + flt(row.agency_markup);
+    let profit = selling - net_cost;
+
+    frappe.model.set_value(cdt, cdn, {
+        supplier_commission: std_comm,
+        net_purchase_price: net_cost,
+        selling_price: selling,
+        profit: profit
+    });
+
+    update_live_margin(frm);
+}
+
+frappe.ui.form.on('Hotel Reservation Item', {
+    purchase_price: function(frm) { update_live_margin(frm); },
+    agency_markup: function(frm) { update_live_margin(frm); }
 });

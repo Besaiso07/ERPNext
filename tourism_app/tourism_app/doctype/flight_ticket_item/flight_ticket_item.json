@@ -9,29 +9,36 @@
   "section_general",
   "ticket_number",
   "pax_name",
-  "col_break_1",
   "airline",
+  "col_break_1",
   "ticket_pnr",
+  "flight_route",
+  "flight_number",
   "col_break_2",
   "supplier",
-  "flight_route",
   "flight_class",
-  "departure_date",
-  "return_date",
   "flight_time",
-  "flight_number",
+  "sec_dates",
+  "departure_date",
+  "col_break_dates",
+  "return_date",
   "section_financial",
   "col_break_cost",
   "fare",
   "tax",
+  "commission_type",
+  "commission_rate",
   "supplier_commission",
   "net_purchase_price",
   "col_break_revenue",
   "agency_markup",
   "selling_price",
+  "currency",
+  "base_currency_amount",
   "profit",
   "is_reported",
-  "sales_invoice"
+  "sales_invoice",
+  "purchase_invoice"
  ],
  "fields": [
   {
@@ -44,18 +51,16 @@
    "fieldtype": "Data",
    "label": "Ticket No.",
    "reqd": 1,
-   "in_list_view": 1
+   "in_list_view": 1,
+   "columns": 2
   },
   {
    "fieldname": "pax_name",
    "fieldtype": "Data",
    "label": "Passenger Name",
    "reqd": 1,
-   "in_list_view": 1
-  },
-  {
-   "fieldname": "col_break_1",
-   "fieldtype": "Column Break"
+   "in_list_view": 1,
+   "columns": 2
   },
   {
    "fieldname": "airline",
@@ -63,13 +68,31 @@
    "label": "Airline / Carrier",
    "options": "Airline",
    "reqd": 1,
-   "in_list_view": 1
+   "in_list_view": 1,
+   "columns": 2
+  },
+  {
+   "fieldname": "col_break_1",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "ticket_pnr",
    "fieldtype": "Data",
    "label": "PNR No.",
    "reqd": 1
+  },
+  {
+   "fieldname": "flight_route",
+   "fieldtype": "Data",
+   "label": "Sector / Route",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 1
+  },
+  {
+   "fieldname": "flight_number",
+   "fieldtype": "Data",
+   "label": "Flight Number"
   },
   {
    "fieldname": "col_break_2",
@@ -82,27 +105,10 @@
    "options": "Supplier"
   },
   {
-   "fieldname": "flight_route",
-   "fieldtype": "Data",
-   "label": "Sector / Route",
-   "reqd": 1,
-   "in_list_view": 1
-  },
-  {
    "fieldname": "flight_class",
-   "fieldtype": "Select",
-   "label": "Flight Class",
-   "options": "\nEconomy\nBusiness\nFirst"
-  },
-  {
-   "fieldname": "departure_date",
-   "fieldtype": "Date",
-   "label": "Departure Date"
-  },
-  {
-   "fieldname": "return_date",
-   "fieldtype": "Date",
-   "label": "Return Date"
+   "fieldtype": "Data",
+   "label": "Flight Class / \u0627\u0644\u062f\u0631\u062c\u0629",
+   "length": 2
   },
   {
    "fieldname": "flight_time",
@@ -110,9 +116,22 @@
    "label": "Flight Time"
   },
   {
-   "fieldname": "flight_number",
-   "fieldtype": "Data",
-   "label": "Flight Number"
+   "fieldname": "sec_dates",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "departure_date",
+   "fieldtype": "Date",
+   "label": "Departure Date"
+  },
+  {
+   "fieldname": "col_break_dates",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "return_date",
+   "fieldtype": "Date",
+   "label": "Return Date"
   },
   {
    "fieldname": "section_financial",
@@ -135,9 +154,22 @@
    "label": "Tax Details"
   },
   {
+   "fieldname": "commission_type",
+   "fieldtype": "Select",
+   "label": "Commission Type",
+   "options": "Percentage\nFixed Amount",
+   "default": "Percentage"
+  },
+  {
+   "fieldname": "commission_rate",
+   "fieldtype": "Float",
+   "label": "Commission Rate/Value"
+  },
+  {
    "fieldname": "supplier_commission",
    "fieldtype": "Currency",
-   "label": "STD Commission"
+   "label": "STD Commission",
+   "read_only": 1
   },
   {
    "fieldname": "net_purchase_price",
@@ -163,6 +195,18 @@
    "in_list_view": 1
   },
   {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "base_currency_amount",
+   "fieldtype": "Currency",
+   "label": "Base Currency Amount (LYD)",
+   "read_only": 1
+  },
+  {
    "fieldname": "profit",
    "fieldtype": "Currency",
    "label": "Profit",
@@ -181,6 +225,14 @@
    "label": "Sales Invoice",
    "options": "Sales Invoice",
    "read_only": 1
+  },
+  {
+   "fieldname": "purchase_invoice",
+   "fieldtype": "Link",
+   "label": "Purchase Invoice",
+   "options": "Purchase Invoice",
+   "read_only": 1,
+   "insert_after": "sales_invoice"
   }
  ],
  "istable": 1,

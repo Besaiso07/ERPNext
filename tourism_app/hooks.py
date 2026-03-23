@@ -26,7 +26,7 @@ app_license = "mit"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/tourism_app/css/tourism_app.css"
-# app_include_js = "/assets/tourism_app/js/tourism_app.js"
+app_include_js = "/assets/tourism_app/js/tourism_workspace.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/tourism_app/css/tourism_app.css"
@@ -47,6 +47,10 @@ app_license = "mit"
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
+doctype_js = {
+	"Sales Invoice": "public/js/hide_invoice_fields.js",
+	"Purchase Invoice": "public/js/hide_invoice_fields.js"
+}
 
 # Svg Icons
 # ------------------
@@ -143,8 +147,49 @@ doc_events = {
 	},
 	"Purchase Invoice": {
 		"on_cancel": "tourism_app.tourism_app.events.purchase_invoice_on_cancel"
+	},
+	"Tour Booking": {
+		"on_update": "tourism_app.tourism_app.doctype.tour_booking.tour_booking.sync_financials_with_invoices"
 	}
 }
+
+fixtures = [
+	{
+		"dt": "Custom Field", 
+		"filters": [
+			[
+				"name", "in", [
+					"Sales Invoice Item-custom_passenger_name",
+					"Sales Invoice Item-custom_ticket_number",
+					"Sales Invoice Item-custom_route",
+					"Sales Invoice Item-custom_airline",
+					"Purchase Invoice-custom_tour_booking",
+					"Sales Invoice-custom_tour_booking",
+					"Customer-air_customer_code"
+				]
+			]
+		]
+	},
+	{
+		"dt": "Property Setter",
+		"filters": [
+			[
+				"name", "in", [
+					"Sales Invoice Item-warehouse-hidden",
+					"Sales Invoice Item-target_warehouse-hidden",
+					"Sales Invoice Item-serial_no-hidden",
+					"Sales Invoice Item-batch_no-hidden",
+					"Sales Invoice Item-weight_per_unit-hidden",
+					"Sales Invoice Item-weight_uom-hidden",
+					"Sales Invoice Item-uom-in_list_view",
+					"Sales Invoice Item-stock_uom-in_list_view",
+					"Sales Invoice Item-item_code-columns",
+					"Sales Invoice Item-item_name-columns"
+				]
+			]
+		]
+	}
+]
 
 # Scheduled Tasks
 # ---------------

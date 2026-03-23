@@ -14,7 +14,8 @@
   "purchase_price",
   "selling_price",
   "is_reported",
-  "sales_invoice"
+  "sales_invoice",
+  "purchase_invoice"
  ],
  "fields": [
   {
@@ -75,6 +76,14 @@
    "label": "Sales Invoice",
    "options": "Sales Invoice",
    "read_only": 1
+  },
+  {
+   "fieldname": "purchase_invoice",
+   "fieldtype": "Link",
+   "label": "Purchase Invoice",
+   "options": "Purchase Invoice",
+   "read_only": 1,
+   "insert_after": "sales_invoice"
   }
  ],
  "istable": 1,
