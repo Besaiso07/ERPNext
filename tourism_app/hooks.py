@@ -25,8 +25,11 @@ app_license = "mit"
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/tourism_app/css/tourism_app.css"
-app_include_js = "/assets/tourism_app/js/tourism_workspace.js"
+app_include_css = "/assets/tourism_app/css/test_ui_overrides_v2.css"
+app_include_js = [
+	"/assets/tourism_app/js/tourism_workspace.js",
+	"/assets/tourism_app/js/phase43_hard_reset.js?v=008"
+]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/tourism_app/css/tourism_app.css"

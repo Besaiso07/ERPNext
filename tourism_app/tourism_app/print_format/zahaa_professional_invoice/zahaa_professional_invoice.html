@@ -1,0 +1,91 @@
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+    
+    @media print {
+        body { font-size: 10px !important; margin: 0 !important; padding: 0 !important; }
+        .print-format { width: 100% !important; margin: 0 !important; padding: 0 !important; }
+        @page { size: A4; margin: 3mm; }
+    }
+
+    .print-format { font-family: 'Cairo', sans-serif; direction: rtl; width: 100%; font-size: 11px; }
+    
+    .z-header { 
+        background: #1b4f72; color: #fff; padding: 20px; 
+        text-align: center; border-radius: 0 0 25px 25px; 
+        margin-bottom: 20px; 
+    }
+    .z-header h1 { font-size: 26px; margin: 0; font-weight: 800; }
+
+    .summary-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; border: 2.2px solid #1b4f72; }
+    .summary-table td { border: 1px solid #1b4f72; padding: 10px; text-align: center; }
+    .label-bg { background: #f0f4f7; color: #1b4f72; font-weight: 700; width: 22%; }
+    .data-table { width: 100% !important; table-layout: auto !important; border-collapse: collapse !important; }
+    .data-table th, .data-table td { border: 1px solid #333; padding: 8px 4px; text-align: center; white-space: nowrap; }
+    .data-table th { background: #1b4f72; color: #fff; }
+    .col-passenger { white-space: normal !important; min-width: 150px; font-weight: 700; }
+    .price-cell { text-align: left !important; font-weight: 700; color: #1b4f72; width: 85px; }
+</style>
+
+<div class="print-format">
+    <div class="z-header">
+        <h1>الزهاء لخدمات السياحة</h1>
+        <div style="font-size: 9px; opacity: 0.7;">TOURISM PORTAL - PROFESSIONAL V1.2 FINAL</div>
+    </div>
+
+    <table class="summary-table">
+        <tr>
+            <td class="label-bg">فاتورة رقم (INV #)</td><td>{{ doc.name }}</td>
+            <td class="label-bg">التاريخ (Date)</td><td>{{ doc.get_formatted("posting_date") }}</td>
+        </tr>
+        <tr>
+            <td class="label-bg">الأخوة (Customer)</td>
+            <td colspan="3" style="font-size: 18px; font-weight: 800; color: #1b4f72;">
+                {{ doc.customer_name or doc.customer or '' }}
+            </td>
+        </tr>
+    </table>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width: 30px;">ت</th>
+                <th>اسم المسافر (Passenger)</th>
+                <th>رقم التذكرة (Ticket #)</th>
+                <th>الرحلة (Trip)</th>
+                <th>الناقل (Airline)</th>
+                <th>الدرجة (Class)</th>
+                <th>السعر (Price)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in doc.flights %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td class="col-passenger">{{ row.custom_passenger_name or row.passenger_name or 'ABUZWIDA/GAMILA' }}</td>
+                <td>{{ row.custom_ticket_number or row.ticket_no or row.ticket_number or '' }}</td>
+                <td>{{ row.custom_route or row.route or row.flight_route or '' }}</td>
+                <td>
+                    {% set ar_airline = frappe.db.get_value("Airline", row.custom_airline_link or row.airline, "custom_airline_arabic_name") %}
+                    {{ ar_airline or row.airline or '' }}
+                </td>
+                <td>
+                    {% set ar_class = frappe.db.get_value("Ticket Class Mapping", row.custom_ticket_class, "class_arabic_name") %}
+                    {{ ar_class or row.flight_class or row.custom_ticket_class or "سياحية" }}
+                </td>
+                <td class="price-cell">{{ "{:,.2f}".format(row.total_sales_price_lyd or row.selling_price or 0.00) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr style="background: #f0f4f7; height: 35px;">
+                <td colspan="6" style="text-align: right; font-weight: 800; padding-left: 15px;">
+                    إجمالي القيمة: Total Amount (LYD)
+                </td>
+                <td class="price-cell" style="background: #1b4f72; color: #fff;">
+                    {{ "{:,.2f}".format(doc.total_selling_amount or doc.total_revenue_lyd or 0.00) }}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
