@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"shortcuts_header\",\"type\":\"header\",\"data\":{\"text\":\"Quick Access\",\"col\":12}},{\"id\":\"shortcut_new_booking\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"New Booking\",\"col\":3}},{\"id\":\"shortcut_upload_ticket\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Upload Ticket (AIR File)\",\"col\":3}},{\"id\":\"shortcut_sales_dash\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Dashboard\",\"col\":3}},{\"id\":\"shortcut_add_airline\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Add Airline\",\"col\":3}},{\"id\":\"spacer_1\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"operations_header\",\"type\":\"header\",\"data\":{\"text\":\"Operations\",\"col\":12}},{\"id\":\"card_operations\",\"type\":\"card\",\"data\":{\"card_name\":\"Operations\",\"col\":4}},{\"id\":\"masters_header\",\"type\":\"header\",\"data\":{\"text\":\"Masters\",\"col\":12}},{\"id\":\"card_masters\",\"type\":\"card\",\"data\":{\"card_name\":\"Masters\",\"col\":4}}]",
+ "content": "[{\"id\": \"hdr1\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"sc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"New Tour Booking\", \"col\": 3}}, {\"id\": \"sc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Import AIR File\", \"col\": 3}}, {\"id\": \"sc3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Sales Invoice\", \"col\": 3}}, {\"id\": \"sc4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Purchase Invoice\", \"col\": 3}}, {\"id\": \"sc5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Customer\", \"col\": 3}}, {\"id\": \"sp1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"hdr2\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Reports & Masters</b></span>\", \"col\": 12}}, {\"id\": \"cd1\", \"type\": \"card\", \"data\": {\"card_name\": \"Operations\", \"col\": 4}}, {\"id\": \"cd2\", \"type\": \"card\", \"data\": {\"card_name\": \"Masters\", \"col\": 4}}, {\"id\": \"cd3\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports & Analytics\", \"col\": 4}}]",
  "creation": "2026-03-17 11:45:00",
  "custom_blocks": [],
  "docstatus": 0,
@@ -11,8 +11,160 @@
  "idx": 0,
  "is_hidden": 0,
  "label": "Tourism",
- "links": [],
- "modified": "2026-03-24 12:26:30.340811",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Operations",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tour Booking",
+   "link_count": 0,
+   "link_to": "Tour Booking",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sales Invoice",
+   "link_count": 0,
+   "link_to": "Sales Invoice",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Purchase Invoice",
+   "link_count": 0,
+   "link_to": "Purchase Invoice",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Masters",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Customer",
+   "link_count": 0,
+   "link_to": "Customer",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Supplier",
+   "link_count": 0,
+   "link_to": "Supplier",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Airline",
+   "link_count": 0,
+   "link_to": "Airline",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Airport",
+   "link_count": 0,
+   "link_to": "Airport",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Ticket Class Mapping",
+   "link_count": 0,
+   "link_to": "Ticket Class Mapping",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Reports & Analytics",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Gross Profit",
+   "link_count": 0,
+   "link_to": "Gross Profit",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Sales Invoice",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Profit and Loss Statement",
+   "link_count": 0,
+   "link_to": "Profit and Loss Statement",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "GL Entry",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sales Register",
+   "link_count": 0,
+   "link_to": "Sales Register",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "Sales Invoice",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "General Ledger",
+   "link_count": 0,
+   "link_to": "General Ledger",
+   "link_type": "Report",
+   "onboard": 0,
+   "report_ref_doctype": "GL Entry",
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-03-25 15:54:55.246044",
  "modified_by": "Administrator",
  "module": "Tourism App",
  "name": "Tourism",
@@ -24,6 +176,37 @@
  "restrict_to_domain": "",
  "roles": [],
  "sequence_id": 1.0,
- "shortcuts": [],
+ "shortcuts": [
+  {
+   "doc_view": "New",
+   "label": "New Tour Booking",
+   "link_to": "Tour Booking",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "New",
+   "label": "Import AIR File",
+   "link_to": "Tour Booking",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "Sales Invoice",
+   "link_to": "Sales Invoice",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "Purchase Invoice",
+   "link_to": "Purchase Invoice",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "Customer",
+   "link_to": "Customer",
+   "type": "DocType"
+  }
+ ],
  "title": "Tourism"
 }
