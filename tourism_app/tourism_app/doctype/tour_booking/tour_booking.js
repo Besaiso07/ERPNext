@@ -148,11 +148,13 @@ frappe.ui.form.on('Tour Booking', {
                 method: 'tourism_app.tourism_app.doctype.tour_booking.tour_booking.get_exchange_rate',
                 args: { from_currency: frm.doc.supplier_currency },
                 callback: function(r) {
-                    if (r.message) {
+                    if (r.message && frm.doc.supplier_exchange_rate !== r.message) {
                         frm.set_value('supplier_exchange_rate', r.message);
                     }
                 }
             });
+            // Refresh table columns to instantly show new currency symbols
+            frm.refresh_fields(["flights", "hotels"]);
         }
     },
     customer_currency: function(frm) {
@@ -161,11 +163,13 @@ frappe.ui.form.on('Tour Booking', {
                 method: 'tourism_app.tourism_app.doctype.tour_booking.tour_booking.get_exchange_rate',
                 args: { from_currency: frm.doc.customer_currency },
                 callback: function(r) {
-                    if (r.message) {
+                    if (r.message && frm.doc.customer_exchange_rate !== r.message) {
                         frm.set_value('customer_exchange_rate', r.message);
                     }
                 }
             });
+            // Refresh table columns to instantly show new currency symbols
+            frm.refresh_fields(["flights", "hotels", "total_selling_amount"]);
         }
     }
 });

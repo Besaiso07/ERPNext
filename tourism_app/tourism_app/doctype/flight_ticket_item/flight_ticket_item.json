@@ -1,7 +1,7 @@
 {
  "actions": [],
  "autoname": "hash",
- "creation": "2026-03-16 00:00:00.000000",
+ "creation": "2026-03-16 00:00:00",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -47,29 +47,29 @@
    "label": "General Ticket Details"
   },
   {
+   "columns": 2,
    "fieldname": "ticket_number",
    "fieldtype": "Data",
-   "label": "Ticket No.",
-   "reqd": 1,
    "in_list_view": 1,
-   "columns": 2
+   "label": "Ticket No.",
+   "reqd": 1
   },
   {
+   "columns": 2,
    "fieldname": "pax_name",
    "fieldtype": "Data",
-   "label": "Passenger Name",
-   "reqd": 1,
    "in_list_view": 1,
-   "columns": 2
+   "label": "Passenger Name",
+   "reqd": 1
   },
   {
+   "columns": 2,
    "fieldname": "airline",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Airline / Carrier",
    "options": "Airline",
-   "reqd": 1,
-   "in_list_view": 1,
-   "columns": 2
+   "reqd": 1
   },
   {
    "fieldname": "col_break_1",
@@ -82,12 +82,12 @@
    "reqd": 1
   },
   {
+   "columns": 1,
    "fieldname": "flight_route",
    "fieldtype": "Data",
-   "label": "Sector / Route",
-   "reqd": 1,
    "in_list_view": 1,
-   "columns": 1
+   "label": "Sector / Route",
+   "reqd": 1
   },
   {
    "fieldname": "flight_number",
@@ -146,19 +146,21 @@
   {
    "fieldname": "fare",
    "fieldtype": "Currency",
-   "label": "Published Fare"
+   "label": "Published Fare",
+   "options": "supplier_currency"
   },
   {
    "fieldname": "tax",
    "fieldtype": "Currency",
-   "label": "Tax Details"
+   "label": "Tax Details",
+   "options": "supplier_currency"
   },
   {
+   "default": "Percentage",
    "fieldname": "commission_type",
    "fieldtype": "Select",
    "label": "Commission Type",
-   "options": "Percentage\nFixed Amount",
-   "default": "Percentage"
+   "options": "Percentage\nFixed Amount"
   },
   {
    "fieldname": "commission_rate",
@@ -169,12 +171,14 @@
    "fieldname": "supplier_commission",
    "fieldtype": "Currency",
    "label": "STD Commission",
+   "options": "supplier_currency",
    "read_only": 1
   },
   {
    "fieldname": "net_purchase_price",
    "fieldtype": "Currency",
    "label": "Supplier Amount / Net Cost",
+   "options": "supplier_currency",
    "read_only": 1
   },
   {
@@ -185,14 +189,16 @@
   {
    "fieldname": "agency_markup",
    "fieldtype": "Currency",
-   "label": "Service Fee / Markup"
+   "label": "Service Fee / Markup",
+   "options": "customer_currency"
   },
   {
    "fieldname": "selling_price",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Final Selling Price",
-   "read_only": 1,
-   "in_list_view": 1
+   "options": "customer_currency",
+   "read_only": 1
   },
   {
    "fieldname": "currency",
@@ -204,12 +210,14 @@
    "fieldname": "base_currency_amount",
    "fieldtype": "Currency",
    "label": "Base Currency Amount (LYD)",
+   "options": "company_currency",
    "read_only": 1
   },
   {
    "fieldname": "profit",
    "fieldtype": "Currency",
    "label": "Profit",
+   "options": "customer_currency",
    "read_only": 1
   },
   {
@@ -231,19 +239,19 @@
    "fieldtype": "Link",
    "label": "Purchase Invoice",
    "options": "Purchase Invoice",
-   "read_only": 1,
-   "insert_after": "sales_invoice"
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2026-03-16 00:00:00.000000",
+ "modified": "2026-03-26 11:55:54.292526",
  "modified_by": "Administrator",
  "module": "Tourism App",
  "name": "Flight Ticket Item",
  "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
