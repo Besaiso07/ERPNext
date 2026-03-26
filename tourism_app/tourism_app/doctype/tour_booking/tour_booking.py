@@ -409,7 +409,7 @@ def create_invoice_from_report(selected_items):
 def _get_party_account(party_type, party, currency, company):
     """
     Finds a Receivable/Payable account for the party that matches the document currency.
-    If no currency-specific account is found, it fallbacks to system default or returns None.
+    If no currency-specific account is found, it automatically creates one based on the default account's parent.
     """
     from erpnext.accounts.party import get_party_account
     
@@ -420,7 +420,7 @@ def _get_party_account(party_type, party, currency, company):
         if acc_currency == currency:
             return default_acc
             
-    # 2. Look for an account with the SPECIFIC currency and type
+    # 2. Look for an existing account with the SPECIFIC currency and type
     acc_type = "Receivable" if party_type == "Customer" else "Payable"
     specific_acc = frappe.db.get_value("Account", {
         "company": company,
@@ -432,7 +432,38 @@ def _get_party_account(party_type, party, currency, company):
     if specific_acc:
         return specific_acc
         
-    # 3. Last fallback: return the original default and let ERPNext/User handle the error if mismatch persists
+    # 3. Auto-create the currency-specific account based on the default account
+    if default_acc:
+        default_acc_doc = frappe.get_doc("Account", default_acc)
+        # e.g., "Creditors - EUR"
+        base_name = default_acc_doc.account_name.split("-")[0].strip()
+        new_acc_name = f"{base_name} - {currency}"
+        
+        # Double check if by any chance it exists
+        existing = frappe.db.get_value("Account", {"account_name": new_acc_name, "company": company}, "name")
+        if existing:
+            return existing
+            
+        try:
+            new_acc = frappe.get_doc({
+                "doctype": "Account",
+                "account_name": new_acc_name,
+                "parent_account": default_acc_doc.parent_account,
+                "company": company,
+                "account_currency": currency,
+                "account_type": acc_type,
+                "is_group": 0,
+                "root_type": default_acc_doc.root_type,
+                "report_type": default_acc_doc.report_type
+            })
+            new_acc.flags.ignore_permissions = True
+            new_acc.insert()
+            frappe.msgprint(f"Auto-created new Account <b>{new_acc.name}</b> for {currency} transactions.", indicator="blue", alert=True)
+            return new_acc.name
+        except Exception:
+            frappe.log_error(title=f"Failed to auto-create {currency} account", message=frappe.get_traceback())
+
+    # 4. Last fallback: return the original default and let ERPNext/User handle the error if mismatch persists
     return default_acc
 
 def sync_financials_with_invoices(doc, method=None):
