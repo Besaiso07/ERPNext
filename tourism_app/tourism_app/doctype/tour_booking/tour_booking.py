@@ -127,6 +127,11 @@ class TourBooking(Document):
         # 1. Sales Invoice
         # ------------------------------------------------------------------
         self._ensure_travel_service_item()
+        
+        base_currency = frappe.db.get_single_value("Global Defaults", "default_currency") or "LYD"
+        cust_currency = self.customer_currency or base_currency
+        cust_rate = float(self.customer_exchange_rate or 1)
+        company = frappe.defaults.get_user_default("Company") or frappe.db.get_single_value('Global Defaults', 'default_company')
 
         si_items = []
         for flight in unreported_flights:
@@ -153,12 +158,13 @@ class TourBooking(Document):
                 "uom": "Nos",
             })
 
-        company = frappe.defaults.get_user_default("Company") or frappe.db.get_single_value('Global Defaults', 'default_company')
-
         sales_invoice = frappe.get_doc({
             "doctype": "Sales Invoice",
             "company": company,
             "customer": self.customer,
+            "currency": cust_currency,
+            "conversion_rate": cust_rate,
+            "debit_to": _get_party_account("Customer", self.customer, cust_currency, company),
             "posting_date": self.booking_date or frappe.utils.today(),
             "due_date": self.booking_date or frappe.utils.today(),
             "items": si_items,
@@ -166,6 +172,10 @@ class TourBooking(Document):
         })
         sales_invoice.flags.ignore_permissions = True
         sales_invoice.set_missing_values()
+        # Re-enforce after set_missing_values
+        sales_invoice.currency = cust_currency
+        sales_invoice.conversion_rate = cust_rate
+        sales_invoice.debit_to = _get_party_account("Customer", self.customer, cust_currency, company)
         sales_invoice.insert()
 
         # ------------------------------------------------------------------
@@ -194,6 +204,9 @@ class TourBooking(Document):
         # ------------------------------------------------------------------
         self._ensure_travel_service_item()
 
+        sup_currency = self.supplier_currency or base_currency
+        sup_rate = float(self.supplier_exchange_rate or 1)
+
         purchase_invoices_created = {}
         for supplier, total_cost in supplier_costs.items():
             if total_cost <= 0:
@@ -201,10 +214,13 @@ class TourBooking(Document):
 
             company = frappe.defaults.get_user_default("Company") or frappe.db.get_single_value('Global Defaults', 'default_company')
 
-            pi = frappe.get_doc({
+            pi_dict = {
                 "doctype": "Purchase Invoice",
                 "company": company,
                 "supplier": supplier,
+                "currency": sup_currency,
+                "conversion_rate": sup_rate,
+                "credit_to": _get_party_account("Supplier", supplier, sup_currency, company),
                 "posting_date": self.booking_date or frappe.utils.today(),
                 "due_date": self.booking_date or frappe.utils.today(),
                 "items": [
@@ -218,9 +234,14 @@ class TourBooking(Document):
                     }
                 ],
                 "custom_tour_booking": self.name,
-            })
+            }
+            pi = frappe.get_doc(pi_dict)
             pi.flags.ignore_permissions = True
             pi.set_missing_values()
+            # Re-enforce after set_missing_values
+            pi.currency = sup_currency
+            pi.conversion_rate = sup_rate
+            pi.credit_to = _get_party_account("Supplier", supplier, sup_currency, company)
             pi.insert()   # Saved as Draft — NOT submitted intentionally
             purchase_invoices_created[supplier] = pi.name
 
@@ -385,6 +406,35 @@ def create_invoice_from_report(selected_items):
 
     return f"Successfully created {len(created_invoices)} Sales Invoice(s): {', '.join(created_invoices)}"
 
+def _get_party_account(party_type, party, currency, company):
+    """
+    Finds a Receivable/Payable account for the party that matches the document currency.
+    If no currency-specific account is found, it fallbacks to system default or returns None.
+    """
+    from erpnext.accounts.party import get_party_account
+    
+    # 1. Try ERPNext default first
+    default_acc = get_party_account(party_type, party, company)
+    if default_acc:
+        acc_currency = frappe.db.get_value("Account", default_acc, "account_currency")
+        if acc_currency == currency:
+            return default_acc
+            
+    # 2. Look for an account with the SPECIFIC currency and type
+    acc_type = "Receivable" if party_type == "Customer" else "Payable"
+    specific_acc = frappe.db.get_value("Account", {
+        "company": company,
+        "account_currency": currency,
+        "account_type": acc_type,
+        "is_group": 0
+    }, "name")
+    
+    if specific_acc:
+        return specific_acc
+        
+    # 3. Last fallback: return the original default and let ERPNext/User handle the error if mismatch persists
+    return default_acc
+
 def sync_financials_with_invoices(doc, method=None):
     """
     Syncs financial updates from the Tour Booking directly to Draft Sales and Purchase Invoices.
@@ -414,6 +464,7 @@ def sync_financials_with_invoices(doc, method=None):
             # --- Enforce Customer Currency & Rate (The Single Source of Truth) ---
             si.currency = cust_currency
             si.conversion_rate = cust_rate
+            si.debit_to = _get_party_account("Customer", doc.customer, cust_currency, si.company)
             si.set("items", [])
             for flight in doc.flights:
                 si.append("items", {
@@ -438,9 +489,10 @@ def sync_financials_with_invoices(doc, method=None):
                     "uom": "Nos",
                 })
             si.set_missing_values()
-            # Re-enforce rate after set_missing_values (which might reset it)
+            # Re-enforce rate and account after set_missing_values (which might reset them)
             si.currency = cust_currency
             si.conversion_rate = cust_rate
+            si.debit_to = _get_party_account("Customer", doc.customer, cust_currency, si.company)
             si.save(ignore_permissions=True)
             frappe.msgprint(f"Synced Sales Invoice <b>{si.name}</b> ({cust_currency} @ {cust_rate})", indicator="green", alert=True)
 
@@ -484,6 +536,7 @@ def sync_financials_with_invoices(doc, method=None):
                 # --- Enforce Supplier Currency & Rate (Single Source of Truth) ---
                 pi.currency = sup_currency
                 pi.conversion_rate = sup_rate
+                pi.credit_to = _get_party_account("Supplier", supplier, sup_currency, pi.company)
                 pi.items = []
                 pi.append("items", {
                     "item_code": "Travel Service",
@@ -497,6 +550,7 @@ def sync_financials_with_invoices(doc, method=None):
                 # Re-enforce after set_missing_values
                 pi.currency = sup_currency
                 pi.conversion_rate = sup_rate
+                pi.credit_to = _get_party_account("Supplier", supplier, sup_currency, pi.company)
                 pi.save(ignore_permissions=True)
                 frappe.msgprint(f"Synced Purchase Invoice <b>{pi.name}</b> ({sup_currency} @ {sup_rate})", indicator="green", alert=True)
                 created_pi_name = pi.name
@@ -512,6 +566,7 @@ def sync_financials_with_invoices(doc, method=None):
                 "supplier": supplier,
                 "currency": sup_currency,
                 "conversion_rate": sup_rate,
+                "credit_to": _get_party_account("Supplier", supplier, sup_currency, company),
                 "posting_date": doc.booking_date or frappe.utils.today(),
                 "due_date": doc.booking_date or frappe.utils.today(),
                 "items": [
@@ -533,6 +588,7 @@ def sync_financials_with_invoices(doc, method=None):
             # Re-enforce after set_missing_values
             pi.currency = sup_currency
             pi.conversion_rate = sup_rate
+            pi.credit_to = _get_party_account("Supplier", supplier, sup_currency, company)
             pi.insert()
             frappe.msgprint(f"Created Purchase Invoice <b>{pi.name}</b> ({sup_currency} @ {sup_rate})", indicator="green", alert=True)
             created_pi_name = pi.name
