@@ -59,14 +59,14 @@ class TourBooking(Document):
 
         # --- Hotels ---
         for hotel in self.hotels:
-            purchase = hotel.purchase_price or 0
+            purchase = hotel.net_cost or 0
             markup = hotel.agency_markup or 0
             hotel.selling_price = purchase + markup
 
         # --- Totals (in Foreign/Booking Currency) ---
         self.total_cost = (
             sum(f.net_purchase_price or 0 for f in self.flights)
-            + sum(h.purchase_price or 0 for h in self.hotels)
+            + sum(h.net_cost or 0 for h in self.hotels)
         )
         self.total_selling_amount = (
             sum(f.selling_price or 0 for f in self.flights)
@@ -196,7 +196,7 @@ class TourBooking(Document):
             supplier = hotel.hotel_supplier
             if not supplier:
                 continue
-            cost = hotel.purchase_price or 0
+            cost = hotel.net_cost or 0
             supplier_costs[supplier] = supplier_costs.get(supplier, 0) + cost
 
         # ------------------------------------------------------------------

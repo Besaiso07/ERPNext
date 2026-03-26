@@ -190,9 +190,9 @@ function update_live_margin(frm) {
 
     (frm.doc.hotels || []).forEach(h => {
         let h_curr = h.currency || 'LYD';
-        currency_costs[h_curr] = (currency_costs[h_curr] || 0) + (h.purchase_price || 0);
-        cost_lyd += (h.base_purchase_price || h.purchase_price || 0);
-        rev_lyd += (h.purchase_price || 0) + (h.agency_markup || 0);
+        currency_costs[h_curr] = (currency_costs[h_curr] || 0) + (h.net_cost || 0);
+        cost_lyd += (h.supplier_amount_lyd || h.net_cost || 0);
+        rev_lyd += (h.selling_price || 0);
     });
 
     let profit = rev_lyd - cost_lyd;
@@ -299,6 +299,29 @@ function calculate_flight_totals(frm, cdt, cdn) {
 }
 
 frappe.ui.form.on('Hotel Reservation Item', {
-    purchase_price: function(frm) { update_live_margin(frm); },
-    agency_markup: function(frm) { update_live_margin(frm); }
+    check_in: function(frm, cdt, cdn) { calculate_hotel_nights(frm, cdt, cdn); },
+    check_out: function(frm, cdt, cdn) { calculate_hotel_nights(frm, cdt, cdn); },
+    net_cost: function(frm, cdt, cdn) { calculate_hotel_pricing(frm, cdt, cdn); },
+    agency_markup: function(frm, cdt, cdn) { calculate_hotel_pricing(frm, cdt, cdn); }
 });
+
+function calculate_hotel_nights(frm, cdt, cdn) {
+    let row = frappe.get_doc(cdt, cdn);
+    if (row.check_in && row.check_out) {
+        let nights = frappe.datetime.get_day_diff(row.check_out, row.check_in);
+        frappe.model.set_value(cdt, cdn, 'number_of_nights', nights > 0 ? nights : 0);
+    }
+}
+
+function calculate_hotel_pricing(frm, cdt, cdn) {
+    let row = frappe.get_doc(cdt, cdn);
+    let net = flt(row.net_cost);
+    let markup = flt(row.agency_markup);
+    
+    frappe.model.set_value(cdt, cdn, {
+        'selling_price': net + markup,
+        'profit': markup
+    });
+    
+    update_live_margin(frm);
+}
