@@ -13,16 +13,31 @@ class TourBooking(Document):
         Auto-calculate all prices, costs and profit.
         Runs on every save (draft or submitted).
         """
+        # --- Defaults: Set currencies if not already set ---
+        base_currency = frappe.db.get_single_value("Global Defaults", "default_currency") or "LYD"
+
+        if not self.customer_currency:
+            self.customer_currency = base_currency
+        if not self.customer_exchange_rate or self.customer_exchange_rate == 0:
+            self.customer_exchange_rate = self._get_exchange_rate(self.customer_currency, base_currency)
+
+        if not self.supplier_currency:
+            # Try to detect from first flight row
+            first_flight_currency = next((f.currency for f in self.flights if f.currency), None)
+            self.supplier_currency = first_flight_currency or base_currency
+        if not self.supplier_exchange_rate or self.supplier_exchange_rate == 0:
+            self.supplier_exchange_rate = self._get_exchange_rate(self.supplier_currency, base_currency)
+
         # --- Flights ---
         for flight in self.flights:
             fare = flight.fare or 0
             tax = flight.tax or 0
-            
+
             if flight.commission_type == "Fixed Amount":
                 flight.supplier_commission = flight.commission_rate or 0
             else:
                 flight.supplier_commission = fare * ((flight.commission_rate or 0) / 100)
-                
+
             commission = flight.supplier_commission or 0
             markup = flight.agency_markup or 0
 
@@ -48,18 +63,44 @@ class TourBooking(Document):
             markup = hotel.agency_markup or 0
             hotel.selling_price = purchase + markup
 
-        # --- Totals ---
+        # --- Totals (in Foreign/Booking Currency) ---
         self.total_cost = (
             sum(f.net_purchase_price or 0 for f in self.flights)
             + sum(h.purchase_price or 0 for h in self.hotels)
         )
-
         self.total_selling_amount = (
             sum(f.selling_price or 0 for f in self.flights)
             + sum(h.selling_price or 0 for h in self.hotels)
         )
-
         self.total_profit = self.total_selling_amount - self.total_cost
+
+        # --- Totals (converted to Base Currency LYD) ---
+        sup_rate = float(self.supplier_exchange_rate or 1)
+        cust_rate = float(self.customer_exchange_rate or 1)
+        self.total_cost_base = self.total_cost * sup_rate
+        self.total_selling_base = self.total_selling_amount * cust_rate
+
+    def _get_exchange_rate(self, from_currency, to_currency):
+        """Fetch latest exchange rate from Currency Exchange DocType. Returns 1.0 as fallback."""
+        if not from_currency or from_currency == to_currency:
+            return 1.0
+        rate = frappe.db.get_value(
+            "Currency Exchange",
+            {"from_currency": from_currency, "to_currency": to_currency},
+            "exchange_rate",
+            order_by="date desc"
+        )
+        if not rate:
+            # Try reverse lookup
+            rate = frappe.db.get_value(
+                "Currency Exchange",
+                {"from_currency": to_currency, "to_currency": from_currency},
+                "exchange_rate",
+                order_by="date desc"
+            )
+            if rate:
+                return 1.0 / float(rate)
+        return float(rate) if rate else 1.0
 
     @frappe.whitelist()
     def create_sales_invoice(self):
@@ -357,12 +398,22 @@ def sync_financials_with_invoices(doc, method=None):
             # create_sales_invoice saves the doc internally which triggers this again
             return
             
+    # --- Helper: Get exchange rate for invoice ---
+    base_currency = frappe.db.get_single_value("Global Defaults", "default_currency") or "LYD"
+    cust_currency = doc.customer_currency or base_currency
+    cust_rate = float(doc.customer_exchange_rate or 1)
+    sup_currency = doc.supplier_currency or base_currency
+    sup_rate = float(doc.supplier_exchange_rate or 1)
+
     # 1. Sync Sales Invoice
     if doc.sales_invoice_reference and frappe.db.exists("Sales Invoice", doc.sales_invoice_reference):
         si = frappe.get_doc("Sales Invoice", doc.sales_invoice_reference)
         if si.docstatus == 1:
             frappe.throw(f"Sales Invoice {si.name} is submitted. Please cancel it first to apply financial changes.")
         elif si.docstatus == 0:
+            # --- Enforce Customer Currency & Rate (The Single Source of Truth) ---
+            si.currency = cust_currency
+            si.conversion_rate = cust_rate
             si.set("items", [])
             for flight in doc.flights:
                 si.append("items", {
@@ -387,9 +438,11 @@ def sync_financials_with_invoices(doc, method=None):
                     "uom": "Nos",
                 })
             si.set_missing_values()
+            # Re-enforce rate after set_missing_values (which might reset it)
+            si.currency = cust_currency
+            si.conversion_rate = cust_rate
             si.save(ignore_permissions=True)
-            # Use frappe.msgprint directly to signal update
-            frappe.msgprint(f"Synced changes to Sales Invoice <b>{si.name}</b>", indicator="green", alert=True)
+            frappe.msgprint(f"Synced Sales Invoice <b>{si.name}</b> ({cust_currency} @ {cust_rate})", indicator="green", alert=True)
 
     # 2. Sync Purchase Invoices
     # Group by (supplier, currency)
@@ -428,40 +481,44 @@ def sync_financials_with_invoices(doc, method=None):
             if pi.docstatus == 1:
                 frappe.throw(f"Purchase Invoice {pi.name} ({curr}) is submitted. Please cancel it first to apply financial changes.")
             elif pi.docstatus == 0:
-                # Update existing draft
-                pi.currency = curr # Ensure currency is set correctly
-                pi.items = [] # Rebuild items to ensure only one item with updated total cost
+                # --- Enforce Supplier Currency & Rate (Single Source of Truth) ---
+                pi.currency = sup_currency
+                pi.conversion_rate = sup_rate
+                pi.items = []
                 pi.append("items", {
                     "item_code": "Travel Service",
                     "item_name": "Travel Service",
-                    "description": f"Tour Booking: {doc.name} — Supplier: {supplier} ({curr})",
+                    "description": f"Tour Booking: {doc.name} — Supplier: {supplier} ({sup_currency})",
                     "qty": 1,
                     "rate": total_cost,
                     "uom": "Nos",
                 })
                 pi.set_missing_values()
+                # Re-enforce after set_missing_values
+                pi.currency = sup_currency
+                pi.conversion_rate = sup_rate
                 pi.save(ignore_permissions=True)
-                frappe.msgprint(f"Synced changes to Purchase Invoice <b>{pi.name}</b> ({curr})", indicator="green", alert=True)
+                frappe.msgprint(f"Synced Purchase Invoice <b>{pi.name}</b> ({sup_currency} @ {sup_rate})", indicator="green", alert=True)
                 created_pi_name = pi.name
         else:
             company = frappe.defaults.get_user_default("Company") or frappe.db.get_single_value('Global Defaults', 'default_company')
 
-            # Create new Purchase Invoice if it doesn't exist
             if hasattr(doc, '_ensure_travel_service_item'):
                 doc._ensure_travel_service_item()
-            
+
             pi_dict = {
                 "doctype": "Purchase Invoice",
                 "company": company,
                 "supplier": supplier,
-                "currency": curr,
+                "currency": sup_currency,
+                "conversion_rate": sup_rate,
                 "posting_date": doc.booking_date or frappe.utils.today(),
                 "due_date": doc.booking_date or frappe.utils.today(),
                 "items": [
                     {
                         "item_code": "Travel Service",
                         "item_name": "Travel Service",
-                        "description": f"Tour Booking: {doc.name} — Supplier: {supplier} ({curr})",
+                        "description": f"Tour Booking: {doc.name} — Supplier: {supplier} ({sup_currency})",
                         "qty": 1,
                         "rate": total_cost,
                         "uom": "Nos",
@@ -469,16 +526,15 @@ def sync_financials_with_invoices(doc, method=None):
                 ],
                 "custom_tour_booking": doc.name,
             }
-            
-            # --- Auto-Account Selection (Multi-Currency) ---
-            # If currency is foreign, ERPNext usually handles it if the supplier has a default account
-            # or it uses the company's default payable.
-            
+
             pi = frappe.get_doc(pi_dict)
             pi.flags.ignore_permissions = True
             pi.set_missing_values()
+            # Re-enforce after set_missing_values
+            pi.currency = sup_currency
+            pi.conversion_rate = sup_rate
             pi.insert()
-            frappe.msgprint(f"Created new Purchase Invoice <b>{pi.name}</b> ({curr})", indicator="green", alert=True)
+            frappe.msgprint(f"Created Purchase Invoice <b>{pi.name}</b> ({sup_currency} @ {sup_rate})", indicator="green", alert=True)
             created_pi_name = pi.name
             
         # Update row links to point to the correct purchase invoice matching supplier AND currency
@@ -505,6 +561,29 @@ def manual_sync_invoices(docname):
 def process_air_file(file_url=None):
     from tourism_app.tourism_app.api import process_air_file as api_process
     return api_process(file_url)
+
+@frappe.whitelist()
+def get_exchange_rate(from_currency):
+    """Return the latest exchange rate from from_currency to the base currency (LYD)."""
+    base_currency = frappe.db.get_single_value("Global Defaults", "default_currency") or "LYD"
+    if not from_currency or from_currency == base_currency:
+        return 1.0
+    rate = frappe.db.get_value(
+        "Currency Exchange",
+        {"from_currency": from_currency, "to_currency": base_currency},
+        "exchange_rate",
+        order_by="date desc"
+    )
+    if not rate:
+        rate = frappe.db.get_value(
+            "Currency Exchange",
+            {"from_currency": base_currency, "to_currency": from_currency},
+            "exchange_rate",
+            order_by="date desc"
+        )
+        if rate:
+            return round(1.0 / float(rate), 6)
+    return float(rate) if rate else 1.0
 
 @frappe.whitelist()
 def import_air_file(content, docname):

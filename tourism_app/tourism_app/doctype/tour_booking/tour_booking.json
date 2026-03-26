@@ -9,6 +9,12 @@
   "customer",
   "booking_date",
   "status",
+  "currency_section",
+  "supplier_currency",
+  "supplier_exchange_rate",
+  "col_break_currency",
+  "customer_currency",
+  "customer_exchange_rate",
   "flights_section",
   "flights",
   "hotels_section",
@@ -17,6 +23,9 @@
   "total_cost",
   "total_selling_amount",
   "total_profit",
+  "col_break_base",
+  "total_cost_base",
+  "total_selling_base",
   "sales_invoice_reference"
  ],
  "fields": [
@@ -47,6 +56,45 @@
    "options": "Draft\nConfirmed\nCancelled"
   },
   {
+   "fieldname": "currency_section",
+   "fieldtype": "Section Break",
+   "label": "Currency & Exchange Rates"
+  },
+  {
+   "fieldname": "supplier_currency",
+   "fieldtype": "Link",
+   "label": "Supplier Currency",
+   "options": "Currency",
+   "description": "Currency used to pay suppliers (airlines, hotels). Auto-set from ticket file."
+  },
+  {
+   "fieldname": "supplier_exchange_rate",
+   "fieldtype": "Float",
+   "label": "Supplier Exchange Rate",
+   "default": "1",
+   "description": "Rate to convert Supplier Currency -> LYD. Editable for manual override.",
+   "precision": "6"
+  },
+  {
+   "fieldname": "col_break_currency",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "customer_currency",
+   "fieldtype": "Link",
+   "label": "Customer Currency",
+   "options": "Currency",
+   "description": "Currency billed to the customer. Defaults to system base currency (LYD)."
+  },
+  {
+   "fieldname": "customer_exchange_rate",
+   "fieldtype": "Float",
+   "label": "Customer Exchange Rate",
+   "default": "1",
+   "description": "Rate to convert Customer Currency -> LYD. Editable for manual override.",
+   "precision": "6"
+  },
+  {
    "fieldname": "flights_section",
    "fieldtype": "Section Break",
    "label": "Flights"
@@ -71,25 +119,45 @@
   {
    "fieldname": "totals_section",
    "fieldtype": "Section Break",
-   "label": "Totals"
+   "label": "Totals (Foreign Currency)"
   },
   {
    "fieldname": "total_cost",
    "fieldtype": "Currency",
-   "label": "Total Cost",
-   "read_only": 1
+   "label": "Total Cost (Supplier Currency)",
+   "read_only": 1,
+   "options": "supplier_currency"
   },
   {
    "fieldname": "total_selling_amount",
    "fieldtype": "Currency",
-   "label": "Total Selling Amount",
-   "read_only": 1
+   "label": "Total Selling Amount (Customer Currency)",
+   "read_only": 1,
+   "options": "customer_currency"
   },
   {
    "fieldname": "total_profit",
    "fieldtype": "Currency",
    "label": "Total Profit",
    "read_only": 1
+  },
+  {
+   "fieldname": "col_break_base",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_cost_base",
+   "fieldtype": "Currency",
+   "label": "Total Cost (LYD)",
+   "read_only": 1,
+   "description": "Supplier cost converted to LYD using Supplier Exchange Rate."
+  },
+  {
+   "fieldname": "total_selling_base",
+   "fieldtype": "Currency",
+   "label": "Total Selling (LYD)",
+   "read_only": 1,
+   "description": "Revenue converted to LYD using Customer Exchange Rate."
   },
   {
    "fieldname": "sales_invoice_reference",
@@ -101,7 +169,7 @@
  ],
  "is_submittable": 0,
  "links": [],
- "modified": "2026-03-16 00:00:00.000000",
+ "modified": "2026-03-26 10:55:00.000000",
  "modified_by": "Administrator",
  "module": "Tourism App",
  "name": "Tour Booking",

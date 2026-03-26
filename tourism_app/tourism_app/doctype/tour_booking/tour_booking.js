@@ -141,6 +141,32 @@ frappe.ui.form.on('Tour Booking', {
         });
 
         update_live_margin(frm);
+    },
+    supplier_currency: function(frm) {
+        if (frm.doc.supplier_currency) {
+            frappe.call({
+                method: 'tourism_app.tourism_app.doctype.tour_booking.tour_booking.get_exchange_rate',
+                args: { from_currency: frm.doc.supplier_currency },
+                callback: function(r) {
+                    if (r.message) {
+                        frm.set_value('supplier_exchange_rate', r.message);
+                    }
+                }
+            });
+        }
+    },
+    customer_currency: function(frm) {
+        if (frm.doc.customer_currency) {
+            frappe.call({
+                method: 'tourism_app.tourism_app.doctype.tour_booking.tour_booking.get_exchange_rate',
+                args: { from_currency: frm.doc.customer_currency },
+                callback: function(r) {
+                    if (r.message) {
+                        frm.set_value('customer_exchange_rate', r.message);
+                    }
+                }
+            });
+        }
     }
 });
 
