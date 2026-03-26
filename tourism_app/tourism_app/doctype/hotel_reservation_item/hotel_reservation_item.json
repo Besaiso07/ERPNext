@@ -7,8 +7,6 @@
  "engine": "InnoDB",
  "field_order": [
   "section_stay",
-  "airline",
-  "ticket_class",
   "hotel_name",
   "room_type",
   "meal_plan",
@@ -208,20 +206,6 @@
    "read_only": 1
   },
   {
-   "columns": 2,
-   "fieldname": "airline",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Airline",
-   "options": "Airline"
-  },
-  {
-   "fieldname": "ticket_class",
-   "fieldtype": "Data",
-   "label": "Ticket Class",
-   "length": 2
-  },
-  {
    "fieldname": "col_break_dates",
    "fieldtype": "Column Break",
    "label": "Dates & Guests"
@@ -229,7 +213,7 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2026-03-26 12:50:20.466547",
+ "modified": "2026-03-26 12:56:39.622446",
  "modified_by": "Administrator",
  "module": "Tourism App",
  "name": "Hotel Reservation Item",
