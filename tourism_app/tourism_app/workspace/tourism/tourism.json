@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\": \"hdr1\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"sc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"New Tour Booking\", \"col\": 3}}, {\"id\": \"sc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Import AIR File\", \"col\": 3}}, {\"id\": \"sc3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Sales Invoice\", \"col\": 3}}, {\"id\": \"sc4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Purchase Invoice\", \"col\": 3}}, {\"id\": \"sc5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Customer\", \"col\": 3}}, {\"id\": \"sp1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"hdr2\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Reports & Masters</b></span>\", \"col\": 12}}, {\"id\": \"cd1\", \"type\": \"card\", \"data\": {\"card_name\": \"Operations\", \"col\": 4}}, {\"id\": \"cd2\", \"type\": \"card\", \"data\": {\"card_name\": \"Masters\", \"col\": 4}}, {\"id\": \"cd3\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports & Analytics\", \"col\": 4}}]",
+ "content": "[{\"id\": \"hdr1\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"sc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"New Tour Booking\", \"col\": 3}}, {\"id\": \"sc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Import Ticket (AIR/PDF)\", \"col\": 3}}, {\"id\": \"sc3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Sales Invoice\", \"col\": 3}}, {\"id\": \"sc4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Purchase Invoice\", \"col\": 3}}, {\"id\": \"sc5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Customer\", \"col\": 3}}, {\"id\": \"sp1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"hdr2\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Reports & Masters</b></span>\", \"col\": 12}}, {\"id\": \"cd1\", \"type\": \"card\", \"data\": {\"card_name\": \"Operations\", \"col\": 4}}, {\"id\": \"cd2\", \"type\": \"card\", \"data\": {\"card_name\": \"Masters\", \"col\": 4}}, {\"id\": \"cd3\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports & Analytics\", \"col\": 4}}]",
  "creation": "2026-03-17 11:45:00",
  "custom_blocks": [],
  "docstatus": 0,
@@ -164,7 +164,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-03-25 15:54:55.246044",
+ "modified": "2026-03-25 16:23:02.923996",
  "modified_by": "Administrator",
  "module": "Tourism App",
  "name": "Tourism",
@@ -185,7 +185,7 @@
   },
   {
    "doc_view": "New",
-   "label": "Import AIR File",
+   "label": "Import Ticket (AIR/PDF)",
    "link_to": "Tour Booking",
    "type": "DocType"
   },
