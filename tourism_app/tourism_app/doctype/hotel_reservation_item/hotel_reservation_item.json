@@ -7,16 +7,18 @@
  "engine": "InnoDB",
  "field_order": [
   "section_stay",
+  "airline",
+  "ticket_class",
   "hotel_name",
   "room_type",
   "meal_plan",
+  "col_break_dates",
   "check_in",
   "check_out",
   "number_of_nights",
-  "col_break_guests",
+  "number_of_rooms",
   "lead_guest",
   "guest_names",
-  "number_of_rooms",
   "hotel_confirmation_number",
   "hotel_supplier",
   "section_financial",
@@ -36,10 +38,12 @@
  ],
  "fields": [
   {
+   "fetch_from": "hotel_name.supplier",
    "fieldname": "hotel_supplier",
    "fieldtype": "Link",
    "label": "Hotel Supplier",
-   "options": "Supplier"
+   "options": "Supplier",
+   "read_only": 1
   },
   {
    "columns": 2,
@@ -114,24 +118,19 @@
   {
    "fieldname": "section_stay",
    "fieldtype": "Section Break",
-   "label": "Stay Info"
+   "label": "Stay & Package"
   },
   {
    "fieldname": "meal_plan",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Meal Plan",
-   "options": "\nRO\nBB\nHB\nFB\nAI"
+   "options": "Meal Plan"
   },
   {
    "fieldname": "number_of_nights",
    "fieldtype": "Int",
    "label": "Number of Nights",
    "read_only": 1
-  },
-  {
-   "fieldname": "col_break_guests",
-   "fieldtype": "Column Break",
-   "label": "Guests & Rooms"
   },
   {
    "fieldname": "lead_guest",
@@ -158,7 +157,7 @@
   {
    "fieldname": "section_financial",
    "fieldtype": "Section Break",
-   "label": "Financials"
+   "label": "Financials - Agency Model"
   },
   {
    "fieldname": "net_cost",
@@ -207,11 +206,30 @@
    "label": "Profit",
    "options": "customer_currency",
    "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "airline",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Airline",
+   "options": "Airline"
+  },
+  {
+   "fieldname": "ticket_class",
+   "fieldtype": "Data",
+   "label": "Ticket Class",
+   "length": 2
+  },
+  {
+   "fieldname": "col_break_dates",
+   "fieldtype": "Column Break",
+   "label": "Dates & Guests"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2026-03-26 12:15:26.305590",
+ "modified": "2026-03-26 12:50:20.466547",
  "modified_by": "Administrator",
  "module": "Tourism App",
  "name": "Hotel Reservation Item",
